@@ -1,0 +1,105 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# Rider IDE
+.idea/
+*.sln.iml
+*.userprefs
+*.DotSettings
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options directory
+.vs/
+.vscode/
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NuGet Packages
+*.nupkg
+.nuget/
+NuGet.exe
+
+# Local NuGet cache
+.nuget/packages/
+
+# ASP.NET Core
+appsettings.*.json
+appsettings.Development.json
+
+# Dotnet tools
+.dotnet/tools/
+
+# ReSharper
+_ReSharper.*/
+*.ReSharper
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+[Tt]humbs.db
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Azure Functions
+func/
+azurite/
+
+# JetBrains Rider
+*.sln.dotnet
+*.ide/
+
+# Output directory
+out/
+
+# Roslyn cache directories
+*.ide/
+
+# MSBuild
+*.msbuild.binlog
+
+# Local development files
+.env
+.env.local
+*.local
+
+# Swagger
+swagger-ui/
+swagger.json
+
+# Node.js
+node_modules/
+npm-debug.log
