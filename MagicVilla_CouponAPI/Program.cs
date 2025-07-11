@@ -96,7 +96,7 @@ app.MapPost("/api/coupon",
 
 // PUT
 app.MapPut("/api/coupon",
-        async (IMapper _mapper, IValidator<CouponUpdateDto> _validation, int id, [FromBody] CouponUpdateDto coupon_U_DTO) =>
+        async (IMapper _mapper, IValidator<CouponUpdateDto> _validation, [FromBody] CouponUpdateDto coupon_U_DTO) =>
         {
             APIResponse response = new()
             {
@@ -117,10 +117,10 @@ app.MapPut("/api/coupon",
                 return Results.BadRequest(response);
             }
             
-            Coupon coupon = CouponStore.couponList.FirstOrDefault(x => x.Id == id);
+            Coupon coupon = CouponStore.couponList.FirstOrDefault(x => x.Id == coupon_U_DTO.Id);
             if (coupon == null)
             {
-                response.ErrorMessages.Add($"A coupon with {id} not exists");
+                response.ErrorMessages.Add($"A coupon with {coupon_U_DTO.Id} not exists");
                 return Results.NotFound(response);
             }
             
