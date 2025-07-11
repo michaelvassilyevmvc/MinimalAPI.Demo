@@ -38,7 +38,7 @@ app.MapPost("/api/coupon", ([FromBody] Coupon coupon) =>
     CouponStore.couponList.Add(coupon);
     return Results.CreatedAtRoute("GetCoupon",new {id = coupon.Id}, coupon);
     // return Results.Created($"/api/coupon/{coupon.Id}", coupon);
-}).WithName("CreatedCoupon").Produces<Coupon>(201).Produces(400);
+}).WithName("CreatedCoupon").Accepts<Coupon>("application/json").Produces<Coupon>(201).Produces(400);
 
 // PUT
 app.MapPut("/api/coupon", () => { });
