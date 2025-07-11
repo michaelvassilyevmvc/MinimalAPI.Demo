@@ -16,9 +16,9 @@ if (app.Environment.IsDevelopment())
 }
 
 // GET
-app.MapGet("/api/coupon", () => Results.Ok(CouponStore.couponList));
+app.MapGet("/api/coupon", () => Results.Ok(CouponStore.couponList)).Produces<IEnumerable<Coupon>>(201);
 app.MapGet("/api/coupon/{id:int}", (int id) => Results.Ok(CouponStore.couponList.FirstOrDefault(x => x.Id == id)))
-    .WithName("GetCoupon");
+    .WithName("GetCoupon").Produces<Coupon>(201);
 
 // POST
 app.MapPost("/api/coupon", ([FromBody] Coupon coupon) =>
@@ -38,7 +38,7 @@ app.MapPost("/api/coupon", ([FromBody] Coupon coupon) =>
     CouponStore.couponList.Add(coupon);
     return Results.CreatedAtRoute("GetCoupon",new {id = coupon.Id}, coupon);
     // return Results.Created($"/api/coupon/{coupon.Id}", coupon);
-}).WithName("CreatedCoupon");
+}).WithName("CreatedCoupon").Produces<Coupon>(201).Produces(400);
 
 // PUT
 app.MapPut("/api/coupon", () => { });
