@@ -7,5 +7,4 @@ public class CouponDTO
     public int Percent { get; set; }
     public bool IsActive { get; set; }
     public DateTime? Created { get; set; }
-    public DateTime? LastUpdated { get; set; }
 }
