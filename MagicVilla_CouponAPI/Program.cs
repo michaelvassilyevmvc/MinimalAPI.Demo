@@ -103,7 +103,7 @@ app.MapPut("/api/coupon",
                 IsSuccess = false,
                 StatusCode = HttpStatusCode.BadRequest,
             };
-            
+
             var validationResult = await _validation.ValidateAsync(coupon_U_DTO);
             if (!validationResult.IsValid)
             {
@@ -111,26 +111,27 @@ app.MapPut("/api/coupon",
                     .ToString());
                 return Results.BadRequest(response);
             }
+
             if (CouponStore.couponList.Any(x => x.Name.ToLower() == coupon_U_DTO.Name.ToLower()))
             {
                 response.ErrorMessages.Add("A coupon with the same name already exists");
                 return Results.BadRequest(response);
             }
-            
+
             Coupon coupon = CouponStore.couponList.FirstOrDefault(x => x.Id == coupon_U_DTO.Id);
             if (coupon == null)
             {
                 response.ErrorMessages.Add($"A coupon with {coupon_U_DTO.Id} not exists");
                 return Results.NotFound(response);
             }
-            
+
             coupon.Name = coupon_U_DTO.Name;
             coupon.Percent = coupon_U_DTO.Percent;
             coupon.IsActive = coupon_U_DTO.IsActive;
             coupon.Created = coupon_U_DTO.Created;
             coupon.LastUpdated = coupon_U_DTO.LastUpdated;
-            
-            
+
+
             CouponDTO couponDto = _mapper.Map<CouponDTO>(coupon);
             response.Result = couponDto;
             response.IsSuccess = true;
@@ -143,14 +144,32 @@ app.MapPut("/api/coupon",
     .Produces(400);
 
 // DELETE
-app.MapDelete("/api/coupon/{id:int}", (int id) =>
-{
-    var coupon = CouponStore.couponList.FirstOrDefault(x => x.Id == id);
-    if (coupon != null)
-        return Results.Ok(CouponStore.couponList.Remove(coupon));
+app.MapDelete("/api/coupon/{id:int}", (IMapper _mapper, int id) =>
+    {
+        APIResponse response = new()
+        {
+            IsSuccess = false,
+            StatusCode = HttpStatusCode.BadRequest,
+        };
+        var coupon = CouponStore.couponList.FirstOrDefault(x => x.Id == id);
 
-    return Results.NotFound();
-});
+        if (coupon == null)
+        {
+            response.ErrorMessages.Add($"Invalid id = {id}");
+            return Results.BadRequest(response);
+        }
+        CouponStore.couponList.Remove(coupon);
+        
+        response.IsSuccess = true;
+        response.StatusCode = HttpStatusCode.OK;
+        return Results.Ok(response);
+        // return Results.Ok(CouponStore.couponList.Remove(coupon));
+
+        // return Results.NotFound();
+    })
+    .WithName("DeletedCoupon")
+    .Produces<APIResponse>(201)
+    .Produces(400);
 
 app.UseHttpsRedirection();
 app.Run();
