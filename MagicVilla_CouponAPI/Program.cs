@@ -15,8 +15,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// GET
 app.MapGet("/api/coupon", () => Results.Ok(CouponStore.couponList));
-app.MapGet("/api/coupon/{id:int}", (int id) => Results.Ok(CouponStore.couponList.FirstOrDefault(x => x.Id == id)));
+app.MapGet("/api/coupon/{id:int}", (int id) => Results.Ok(CouponStore.couponList.FirstOrDefault(x => x.Id == id)))
+    .WithName("GetCoupon");
+
+// POST
 app.MapPost("/api/coupon", ([FromBody] Coupon coupon) =>
 {
     if (coupon.Id != 0 || string.IsNullOrEmpty(coupon.Name))
@@ -28,18 +32,24 @@ app.MapPost("/api/coupon", ([FromBody] Coupon coupon) =>
     {
         return Results.BadRequest("A coupon with the same name already exists");
     }
+
     int max = CouponStore.couponList.Max(x => x.Id);
     coupon.Id = max + 1;
     CouponStore.couponList.Add(coupon);
-    return Results.Created($"/api/coupon/{coupon.Id}",coupon);
-});
+    return Results.CreatedAtRoute("GetCoupon",new {id = coupon.Id}, coupon);
+    // return Results.Created($"/api/coupon/{coupon.Id}", coupon);
+}).WithName("CreatedCoupon");
+
+// PUT
 app.MapPut("/api/coupon", () => { });
+
+// DELETE
 app.MapDelete("/api/coupon/{id:int}", (int id) =>
 {
     var coupon = CouponStore.couponList.FirstOrDefault(x => x.Id == id);
     if (coupon != null)
         return Results.Ok(CouponStore.couponList.Remove(coupon));
-    
+
     return Results.NotFound();
 });
 
