@@ -16,7 +16,11 @@ if (app.Environment.IsDevelopment())
 }
 
 // GET
-app.MapGet("/api/coupon", () => Results.Ok(CouponStore.couponList)).Produces<IEnumerable<Coupon>>(201);
+app.MapGet("/api/coupon", (ILogger<Program> _logger) =>
+{
+    _logger.LogInformation("Get all coupons");
+    return Results.Ok(CouponStore.couponList);
+}).Produces<IEnumerable<Coupon>>(201);
 app.MapGet("/api/coupon/{id:int}", (int id) => Results.Ok(CouponStore.couponList.FirstOrDefault(x => x.Id == id)))
     .WithName("GetCoupon").Produces<Coupon>(201);
 
