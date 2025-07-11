@@ -1,8 +1,10 @@
 using AutoMapper;
+using FluentValidation;
 using MagicVilla_CouponAPI;
 using MagicVilla_CouponAPI.Data;
 using MagicVilla_CouponAPI.Models;
 using MagicVilla_CouponAPI.Models.DTO;
+using MagicVilla_CouponAPI.Validations;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
+builder.Services.AddValidatorsFromAssembly(typeof(CouponCreateValidation).Assembly);
 
 var app = builder.Build();
 
@@ -31,23 +34,33 @@ app.MapGet("/api/coupon/{id:int}", (int id) => Results.Ok(CouponStore.couponList
     .Produces<Coupon>(201);
 
 // POST
-app.MapPost("/api/coupon", (IMapper _mapper, [FromBody] CouponCreateDto coupon_C_DTO) =>
-    {
-        if (CouponStore.couponList.Any(x => x.Name.ToLower() == coupon_C_DTO.Name.ToLower()))
+
+app.MapPost("/api/coupon",
+        (IMapper _mapper, IValidator<CouponCreateDto> _validation, [FromBody] CouponCreateDto coupon_C_DTO) =>
         {
-            return Results.BadRequest("A coupon with the same name already exists");
-        }
+            var validationResult = _validation.ValidateAsync(coupon_C_DTO)
+                .GetAwaiter()
+                .GetResult();
+            if (!validationResult.IsValid)
+            {
+                return Results.BadRequest(validationResult.Errors.FirstOrDefault().ToString());
+            }
+            
+            if (CouponStore.couponList.Any(x => x.Name.ToLower() == coupon_C_DTO.Name.ToLower()))
+            {
+                return Results.BadRequest("A coupon with the same name already exists");
+            }
 
-        Coupon coupon = _mapper.Map<Coupon>(coupon_C_DTO);
+            Coupon coupon = _mapper.Map<Coupon>(coupon_C_DTO);
 
-        int max = CouponStore.couponList.Max(x => x.Id);
-        coupon.Id = max + 1;
-        CouponStore.couponList.Add(coupon);
-        CouponDTO couponDto = _mapper.Map<CouponDTO>(coupon);
-        
-        return Results.CreatedAtRoute("GetCoupon", new { id = coupon.Id }, couponDto);
-        // return Results.Created($"/api/coupon/{coupon.Id}", coupon);
-    })
+            int max = CouponStore.couponList.Max(x => x.Id);
+            coupon.Id = max + 1;
+            CouponStore.couponList.Add(coupon);
+            CouponDTO couponDto = _mapper.Map<CouponDTO>(coupon);
+
+            return Results.CreatedAtRoute("GetCoupon", new { id = coupon.Id }, couponDto);
+            // return Results.Created($"/api/coupon/{coupon.Id}", coupon);
+        })
     .WithName("CreatedCoupon")
     .Accepts<CouponCreateDto>("application/json")
     .Produces<CouponDTO>(201)
