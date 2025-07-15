@@ -79,9 +79,7 @@ app.MapPost("/api/coupon",
             }
 
             Coupon coupon = _mapper.Map<Coupon>(coupon_C_DTO);
-
-            int max = _db.Coupons.Max(x => x.Id);
-            coupon.Id = max + 1;
+            
             _db.Coupons.Add(coupon);
             CouponDTO couponDto = _mapper.Map<CouponDTO>(coupon);
 
