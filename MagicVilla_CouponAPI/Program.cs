@@ -7,6 +7,7 @@ using MagicVilla_CouponAPI.Models;
 using MagicVilla_CouponAPI.Models.DTO;
 using MagicVilla_CouponAPI.Validations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddValidatorsFromAssembly(typeof(CouponCreateValidation).Assembly);
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
@@ -158,8 +161,9 @@ app.MapDelete("/api/coupon/{id:int}", (IMapper _mapper, int id) =>
             response.ErrorMessages.Add($"Invalid id = {id}");
             return Results.BadRequest(response);
         }
+
         CouponStore.couponList.Remove(coupon);
-        
+
         response.IsSuccess = true;
         response.StatusCode = HttpStatusCode.OK;
         return Results.Ok(response);
