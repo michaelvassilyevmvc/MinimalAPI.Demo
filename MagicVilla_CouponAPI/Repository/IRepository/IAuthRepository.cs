@@ -5,6 +5,6 @@ namespace MagicVilla_CouponAPI.Repository.IRepository;
 public interface IAuthRepository
 {
     bool IsUniqueUser(string userName);
-    Task<LoginResponseDTO> Authenticate(LoginRequestDTO loginRequestDto);
+    Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDto);
     Task<UserDTO> Register(RegistrationRequestDTO requestDto);
 }
