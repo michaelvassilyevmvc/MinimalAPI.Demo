@@ -7,6 +7,7 @@ using MagicVilla_CouponAPI.Data;
 using MagicVilla_CouponAPI.Models;
 using MagicVilla_CouponAPI.Models.DTO;
 using MagicVilla_CouponAPI.Repository.IRepository;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MagicVilla_CouponAPI.Repository;
@@ -16,19 +17,24 @@ public class AuthRepository : IAuthRepository
     private readonly ApplicationDbContext _db;
     private readonly IConfiguration _configuration;
     private readonly IMapper _mapper;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private string secretKey;
 
-    public AuthRepository(ApplicationDbContext db, IMapper mapper, IConfiguration configuration)
+    public AuthRepository(ApplicationDbContext db, IMapper mapper, IConfiguration configuration,
+        UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {
         _db = db;
         _mapper = mapper;
         _configuration = configuration;
+        _userManager = userManager;
+        _roleManager = roleManager;
         secretKey = _configuration.GetValue<string>("ApiSettings:SecretKey");
     }
 
     public bool IsUniqueUser(string userName)
     {
-        var user = _db.LocalUsers.FirstOrDefault(x => x.UserName == userName);
+        var user = _db.ApplicationUsers.FirstOrDefault(x => x.UserName == userName);
         if (user == null)
         {
             return true;
@@ -39,12 +45,18 @@ public class AuthRepository : IAuthRepository
 
     public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDto)
     {
-        var user = _db.LocalUsers.SingleOrDefault(x => x.UserName == loginRequestDto.UserName && x.Password == loginRequestDto.Password);
-        if (user == null)
+        var user = _db.ApplicationUsers.SingleOrDefault(x =>
+            x.UserName == loginRequestDto.UserName);
+        // проверка по hash пароля на совпадения
+        bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+        if (user == null || isValid == false)
         {
             return null;
         }
-        
+
+        // получение роли пользователя
+        var roles = await _userManager.GetRolesAsync(user);
+
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(secretKey);
         var tokenDescription = new SecurityTokenDescriptor()
@@ -52,10 +64,11 @@ public class AuthRepository : IAuthRepository
             Subject = new ClaimsIdentity(new Claim[]
             {
                 new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.Role, roles.FirstOrDefault()),
             }),
             Expires = DateTime.UtcNow.AddDays(7),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            SigningCredentials =
+                new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
         var token = tokenHandler.CreateToken(tokenDescription);
         LoginResponseDTO loginResponseDTO = new()
@@ -69,16 +82,37 @@ public class AuthRepository : IAuthRepository
 
     public async Task<UserDTO> Register(RegistrationRequestDTO requestDto)
     {
-        LocalUser userObj = new()
+        ApplicationUser userObj = new()
         {
             UserName = requestDto.UserName,
-            Password = requestDto.Password,
             Name = requestDto.Name,
-            Role = "customer"
+            NormalizedEmail = requestDto.UserName.ToUpper(),
+            Email = requestDto.UserName,
         };
-        await _db.LocalUsers.AddAsync(userObj);
-        await _db.SaveChangesAsync();
-        userObj.Password = "";
-        return _mapper.Map<UserDTO>(userObj);
+        try
+        {
+            var result = await _userManager.CreateAsync(userObj, requestDto.Password);
+            if (result.Succeeded)
+            {
+                if (!_roleManager.RoleExistsAsync("admin")
+                        .GetAwaiter()
+                        .GetResult())
+                {
+                    await _roleManager.CreateAsync(new IdentityRole("admin"));
+                    await _roleManager.CreateAsync(new IdentityRole("customer"));
+                }
+
+                await _userManager.AddToRoleAsync(userObj, "admin");
+                var user = _db.ApplicationUsers.FirstOrDefault(x => x.UserName == userObj.UserName);
+                return _mapper.Map<UserDTO>(user);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
+        return null;
     }
 }

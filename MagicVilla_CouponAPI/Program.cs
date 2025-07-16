@@ -1,13 +1,14 @@
-using System.Security.Claims;
 using System.Text;
 using FluentValidation;
 using MagicVilla_CouponAPI;
 using MagicVilla_CouponAPI.Data;
 using MagicVilla_CouponAPI.Endpoints;
+using MagicVilla_CouponAPI.Models;
 using MagicVilla_CouponAPI.Repository;
 using MagicVilla_CouponAPI.Repository.IRepository;
 using MagicVilla_CouponAPI.Validations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -15,6 +16,9 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddDefaultTokenProviders()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddSwaggerGen(options =>
 {
     // Вывод в swagger возможности ввода Bearer
