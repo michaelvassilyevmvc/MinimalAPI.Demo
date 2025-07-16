@@ -11,5 +11,6 @@ public class MappingConfig: Profile
         CreateMap<Coupon, CouponCreateDto>().ReverseMap();
         CreateMap<Coupon, CouponUpdateDto>().ReverseMap();
         CreateMap<Coupon, CouponDTO>().ReverseMap();
+        CreateMap<LocalUser, UserDTO>().ReverseMap();
     }
 }
