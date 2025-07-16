@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using FluentValidation;
 using MagicVilla_CouponAPI;
@@ -17,11 +18,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     // Вывод в swagger возможности ввода Bearer
-    options.AddSecurityDefinition("Bearer",new OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n "+
-        "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\n"+
-        "Example: 'Bearer 12345abcdef'",
+        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n " +
+                      "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\n" +
+                      "Example: 'Bearer 12345abcdef'",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -79,7 +80,10 @@ builder.Services.AddAuthentication(x =>
             ValidateAudience = false
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
+});
 
 
 var app = builder.Build();

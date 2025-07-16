@@ -74,7 +74,7 @@ public class AuthRepository : IAuthRepository
             UserName = requestDto.UserName,
             Password = requestDto.Password,
             Name = requestDto.Name,
-            Role = "admin"
+            Role = "customer"
         };
         await _db.LocalUsers.AddAsync(userObj);
         await _db.SaveChangesAsync();

@@ -4,6 +4,7 @@ using FluentValidation;
 using MagicVilla_CouponAPI.Models;
 using MagicVilla_CouponAPI.Models.DTO;
 using MagicVilla_CouponAPI.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MagicVilla_CouponAPI.Endpoints;
@@ -16,7 +17,7 @@ public static class CouponEndpoints
         app.MapGet("/api/coupon", GetAllCoupon)
             .WithName("GetCoupons")
             .Produces<APIResponse>(201)
-            .RequireAuthorization();
+            .RequireAuthorization("AdminOnly");
 
         // GET by Id
         app.MapGet("/api/coupon/{id:int}", GetByIdCoupon)
@@ -44,6 +45,7 @@ public static class CouponEndpoints
             .Produces(400);
     }
 
+    [Authorize]
     private static async Task<IResult> GetByIdCoupon(ICouponRepository _couponRepo, ILogger<Program> _logger, int id)
     {
         APIResponse response = new();
@@ -54,6 +56,7 @@ public static class CouponEndpoints
         return Results.Ok(response);
     }
 
+    [Authorize]
     private static async Task<IResult> CreateCoupon(ICouponRepository _couponRepo, IMapper _mapper,
         IValidator<CouponCreateDto> _validation,
         [FromBody] CouponCreateDto coupon_C_DTO)
@@ -91,6 +94,7 @@ public static class CouponEndpoints
         return Results.Ok(response);
     }
 
+    [Authorize]
     private static async Task<IResult> UpdateCoupon(ICouponRepository _couponRepo, IMapper _mapper,
         IValidator<CouponUpdateDto> _validation,
         [FromBody] CouponUpdateDto coupon_U_DTO)
@@ -134,6 +138,7 @@ public static class CouponEndpoints
         return Results.Ok(response);
     }
 
+    [Authorize]
     private static async Task<IResult> DeleteCoupon(ICouponRepository _couponRepo, ILogger<Program> _logger, int id)
     {
         APIResponse response = new()
@@ -157,6 +162,7 @@ public static class CouponEndpoints
         return Results.Ok(response);
     }
 
+    [Authorize]
     private static async Task<IResult> GetAllCoupon(ICouponRepository _couponRepo, ILogger<Program> _logger)
     {
         APIResponse response = new();
