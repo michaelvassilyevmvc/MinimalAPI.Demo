@@ -15,7 +15,8 @@ public static class CouponEndpoints
         // GET
         app.MapGet("/api/coupon", GetAllCoupon)
             .WithName("GetCoupons")
-            .Produces<APIResponse>(201);
+            .Produces<APIResponse>(201)
+            .RequireAuthorization();
 
         // GET by Id
         app.MapGet("/api/coupon/{id:int}", GetByIdCoupon)
